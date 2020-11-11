@@ -14,7 +14,7 @@ The Perceptron (1957) by Rosenblatt
 * Works in high dimensional spaces
 * During training this algorithm will find a hyperplane if it exists
 * Defining the hyperplane: H={x: w^(T)x+b=0} (it's one dimension, but the data is in two dimensions)
-* During testing, take the sign of the computed hyperplane: sign(w^(T)x+b) If >0 its on one side of the hyperplane, if <0 its on the other side, if =0 lands on the hyperplane. If t lands on the hyperplane, you get out a coin and flip it, if its heads its here and if it's tails its the other side. Assign y={-1,+1} (like O and X). Must learn 2 things, W and b. However, instead of finding two things we can reduce the number of things we need to find by using the dot product against [xi, 1] with [W, b], this makes H={x: W^Tx=0}
+* During testing, take the sign of the computed hyperplane: sign(w^(T)x+b) If >0 its on one side of the hyperplane, if <0 its on the other side, if =0 lands on the hyperplane. If t lands on the hyperplane, you get out a coin and flip it, if its heads its here and if it's tails its the other side. Assign y={-1,+1} (like O and X). Must learn 2 things, W and b. However, instead of finding two things we can reduce the number of things we need to find by using the dot product against [xi, 1] with [W, b], this makes H={x: W^Tx=0, using W bar and X bar}
 
 The simplest algorithm is K-Nearest Neighbor from 1967
 * Binary Classification Problem
