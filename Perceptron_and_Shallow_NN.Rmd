@@ -1,0 +1,146 @@
+---
+title: "Percepton and Shallow Neural Network"
+author: "Shyla C. Solis"
+date: "11/24/2020"
+output: html_document
+---
+
+
+
+## Introduction
+
+
+An online rental video company is interested in creating a model to make movie recommendations to one of its customers, Ms. X. As a consultant to this company, you are provided with the history of the movies that she accepted or rejected to watch. She makes her selections solely based on the movie genre and critic ratings. The data is in movieData.csv 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
+library(dplyr)
+```
+
+## Read & Examine the Data
+
+The original data:
+```{r READdata}
+d = read.csv('movieData.csv')
+print(d)
+```
+
+We observe, there are 13 rows with 3 features. The feature, "LevelOfViolence" is a rank, this variable is an interval measurement. The feature, "CriticsRating", sounds like a rating, hence the given name for the variable, however, since the variable contains a zero point it is a ratio measurement.The last variable, "Watched", is a nominal measurement since it's identifying a type rather than amounts of something.  
+
+Let's learn more about the data we will be working with:
+```{r COLUMNtypes}
+str(d)
+
+```
+Notice, the stored elements in column, "Watched" are integers. We will need to change them to factors instead (prepare to work with ggplot).
+
+
+```{r CHANGEtype}
+d_copy <-d
+d_copy[,'Watched']<-factor(d_copy[,'Watched'])          # make sure -1 and 1 are factors for plotting in ggplot
+str(d_copy)
+```
+
+Let's now visualize the customers history of recommendations by plotting Ms. X's recorded metrics for movies she accepted or rejected. We will do this by plotting "LevelOfViolence" vs. "CriticRating".
+
+```{r avghypconstant}
+
+############## Visualize the data ##################################
+library(ggplot2)
+ggplot(d_copy, aes(x = LevelOfViolence, y = CriticsRating)) + 
+        geom_point(aes(colour=Watched, shape=Watched), size = 3) +
+        xlab("Level of Violence") + 
+        ylab("Critics Rating") + 
+        ggtitle("Watched vs Level of Violence and Critics Ratings")
+```
+
+After observing the data, we see the data is linearly separable.The Perceptron (1957) by Rosenblatt is an algorithm for supervised learning of binary classifiers.It makes the assumption that there must be a hyper plane that separates one class from the other. "There exists a hyper plane such that all the points from one class lay on one side of the hyper plane, while all the points from the other class lay on the other side of the hyper plane". https://www.youtube.com/watch?v=BbYV8UfMJSA&t=546s 
+
+```{r PERCEPTRONsetup}
+### Now lets separate into x and y ###
+# Fill a vector of ones with 13 elements (accounting for the bias term: think... 1+x1+x2=y)
+ones<-rep(1, 13)
+x <-d[,c(1,2)] # size : 13 by 2
+y <-d[, 3] 
+df <-data.frame(cbind(ones,x,y)) # size: 13 by 3
+       # Actual targets
+print(df) # f has column for bias, two more columns for x1 and x2, and last column for labels
+
+
+```
+
+## Train a perceptron
+
+I will use the Perceptron Learning Algorithm (PLA), which will create a linear boundary decision that will help the company to make future recommendations to Ms. X and report the model and the number of iterations it took for the weights to converge.
+
+```{r perceptron}
+###################### My notes about the problem at hand ######################################################################################  
+# Randomly choose but since its linear remember w0 and w1 is slope and intercept
+# As you go through your learning algorithm your going to adjust the w's
+# Assume the data is linearly seperable
+# Navigate through your hypothesis space
+# Come up with the line that best seperates
+  
+# First initialize w, then make predictionss and look at them and compare with the actual target values(this should be done with training set)
+# Choose the missclassified point and update the w vector with the rule newW=oldW+yn(Xn)
+# Let yn be the target and h(x) be the predicted value, where h(x)=sign(x)
+# For example, let y1=1 and h(x1)=-1, then this is a misclassified point
+
+# Initialize the weights (Goal is to have w_Vec converge, where w0=-treshold)
+################################################################################################################################################
+
+set.seed(123)
+
+perceptron <- function(df) {
+  w_vec <-as.matrix(runif(3,0,1), nrow=3, byrow=TRUE) # Initializing elements of the w vector (Remember, w0 is the treshold)
+  continue=TRUE                                       # Perform all calculations until all points have been classified correctly, at which point, its is set FALSE
+  iterations=0                                        # Initialize to keep track of how many times you must iterate over the entire data set just so each point is class correctly
+  while(continue){                                    # Begin the while loop to iterate over each point until w_vec converges
+    continue=FALSE                                    # Expect to find points that are misclassified, so this will turn back to true once found, unless all found already
+    iterations=iterations+1
+    for(i in 1:nrow(df)){
+      x_vec <- data.matrix(df[i,1:3])                 # Grab the x_values and store them
+      y <- data.matrix(df[i,4])                       # GRab the target value, store it
+      h_of_x <-sign((x_vec)%*%(w_vec))                # Grab predicted value, store it
+      y<-as.numeric(y)                                # Force to be numeric otherwise non-comfortable arguments when multiplying
+      if(y!=h_of_x){                                  # Check, if the actual and predicted are not equal then we need to update w_vec
+        w_vec <-w_vec+y*t(x_vec)                      # Rule for updating W using perceptron
+        continue=TRUE                                 # Since a point was found to be misclassified, we should continue looping through the entire data set again
+      }
+    }
+  }
+  
+  print(paste("The number of iterations is:", iterations))
+  
+  
+  return(w_vec)
+}
+
+w_final <- perceptron(df)
+
+```
+
+Therefore, the finite number of times the W vector was updated is described by the number of iterations it took to converge. At this point, all vectors have been classified correctly. 
+```{r answer}
+
+print(paste("This is the final W: where w0=", w_final[1], "w1=", w_final[2], "and w2=", w_final[3]))
+
+```
+
+Using the final W vector, we can compute the slope and y-intercept of the model. Using the equation:  
+```{r REPORTmodel}
+# We also want to report the model which is the linear boundary decision that will help the company make decisions
+
+print("Here is the model")
+w0 <- w_final[1]
+w1 <- w_final[2]
+w2 <- w_final[3]
+
+m <- -w1/w2                   # Slope of the linear line (decision boundary)
+b <- -w0/w2                   # Y-intercept of the linear line (decision boundary)
+
+print("y=0.6410891x+1.538954")
+
+```
+The slope is calculated using w1/w2, while the y-intercept is calculated using w0/w2. 
+
+For more details and intuition on the perceptron, use: http://hagan.okstate.edu/4_Perceptron.pdf AND https://page.mi.fu-berlin.de/rojas/neural/chapter/K4.pdf 
