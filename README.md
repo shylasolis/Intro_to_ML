@@ -19,7 +19,7 @@ The Perceptron (1957) by Rosenblatt
 * You start off with the W vector being zero, yi are either +1 or -1, set a variable m to count for the number of points miss classified. while no points are missclasified, then for all points in the data set, if yw^(T)x <=0 then w becomes w+yx, also increase m, the counter, to be m=m+1. Outside the for loop, check, if m=0 then your done. If there exist suh a hyperplane then the algorithm will converge.  
 
 The simplest algorithm is K-Nearest Neighbor from 1967
-* Binary Classification Problem
+* Binary Classification Problem (Supervised Learning)
 * Makes the assumption that data points that are simliar, have similar labels
 * Works on data sets even if they are not linearly separable
 * This algortihm is only as good as it's distance metric. This means if the the distance metric is showing similrity in labels (most common is the Minkowski Distance) (distance can also be learned) When p=1, Manhatten; When p=2, Euclideon; When p=infinity, Max.
